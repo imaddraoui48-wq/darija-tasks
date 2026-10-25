@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ary" dir="rtl">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Darija Tasks</title>
+<style>body{font-family:system-ui;background:#f3f5fa;color:#172033;max-width:600px;margin:40px auto;padding:20px}input,button{font:inherit;padding:10px;border:1px solid #aaa;border-radius:8px}form{display:flex;gap:8px}input{flex:1;min-width:0}ul{padding:0;list-style:none}li{display:flex;gap:12px;align-items:center;background:white;margin:10px 0;padding:12px;border-radius:10px}li span{flex:1;overflow-wrap:anywhere}.done{text-decoration:line-through;color:#666}button{cursor:pointer}#status{color:#654300}</style>
+<h1>مهامي — Darija Tasks</h1>
+<p>كتب شنو خاصك تدير، وعلّم عليه ملي تسالي.</p>
+<form id="form"><input id="task" aria-label="مهمة جديدة" placeholder="زيد مهمة…" maxlength="300" required><button>زيد</button></form>
+<p id="status" role="status"></p><ul id="list"></ul>
+<p>المهام كتبقى غير فهاد المتصفح. مسح بيانات المتصفح يقدر يمسحها.</p>
+<script>
+const key='darija-tasks-v1',list=document.getElementById('list'),status=document.getElementById('status'),input=document.getElementById('task');
+let tasks=[];
+try{const saved=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(saved))tasks=saved.filter(t=>t&&typeof t.text==='string'&&typeof t.done==='boolean').map(t=>({text:t.text.slice(0,300),done:t.done}));}catch{status.textContent='ما قدرناش نقراو المهام المحفوظة. تقدر تستعمل التطبيق بلا حفظ.';}
+function save(){try{localStorage.setItem(key,JSON.stringify(tasks));status.textContent='';}catch{status.textContent='الحفظ ما خدامش؛ التغييرات غتبقى غير حتى تسد الصفحة.';}}
+function render(){list.replaceChildren();tasks.forEach((t,i)=>{const li=document.createElement('li'),check=document.createElement('input'),text=document.createElement('span'),del=document.createElement('button');check.type='checkbox';check.checked=t.done;check.setAttribute('aria-label','كمّلت: '+t.text);check.onchange=()=>{tasks[i].done=check.checked;save();render();};text.textContent=t.text;text.className=t.done?'done':'';del.textContent='حيد';del.setAttribute('aria-label','حيد: '+t.text);del.onclick=()=>{tasks.splice(i,1);save();render();};li.append(check,text,del);list.append(li);});}
+document.getElementById('form').onsubmit=e=>{e.preventDefault();const text=input.value.trim();if(!text)return;tasks.push({text,done:false});save();render();input.value='';input.focus();};render();
+</script>
+</html>
